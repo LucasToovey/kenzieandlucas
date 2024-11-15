@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>My Blog</h1>
+    </header>
+    <main id="blog-posts">
+        <!-- Posts will be inserted here -->
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
+
+// In your frontend/app.js:
+// First, install the Sanity client: npm install @sanity/client
+import sanityClient from '@sanity/client'
+
+const client = sanityClient({
+  projectId: 'your-project-id',
+  dataset: 'production',
+  apiVersion: '2024-03-15',
+  useCdn: true
+})
+
+async function loadBlogPosts() {
+  try {
+    const posts = await client.fetch(`
+      *[_type == "post"] | order(publishedAt desc) {
+        title,
+        slug,
+        mainImage {
+          asset-> {
+            _id,
+            url
+          }
+        },
+        publishedAt,
+        content
+      }
+    `)
+    
+    displayPosts(posts)
+  } catch (error) {
+    console.error('Error loading posts:', error)
+  }
+}
+
+function displayPosts(posts) {
+  const container = document.getElementById('blog-posts')
+  
+  posts.forEach(post => {
+    const article = document.createElement('article')
+    article.className = 'blog-post'
+    
+    const imageUrl = post.mainImage?.asset?.url
+    const date = new Date(post.publishedAt).toLocaleDateString()
+    
+    article.innerHTML = `
+      ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : ''}
+      <h2>${post.title}</h2>
+      <time>${date}</time>
+      <div class="content">
+        ${formatContent(post.content)}
+      </div>
+    `
+    
+    container.appendChild(article)
+  })
+}
