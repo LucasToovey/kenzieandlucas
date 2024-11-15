@@ -5,7 +5,7 @@ export default defineConfig({
   name: 'default',
   title: 'My Blog',
   
-  projectId: '', // We'll add this after setting up Sanity
+  projectId: '12pg03w7', // We'll add this after setting up Sanity
   dataset: 'production',
   
   plugins: [deskTool()],
